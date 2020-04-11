@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -24,6 +25,7 @@ import static com.example.sarvbhog.CommonFunctions.showToast;
 public class IncompletePrepareMarkerDialog extends Dialog{
     public Activity c;
     public Dialog d;
+    ProgressBar pb;
     TextView addr_tv,count_tv,name_tv,phone_tv, foodType_tv;
     Button serveBtn,cancelBtn;
     FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -48,6 +50,8 @@ public class IncompletePrepareMarkerDialog extends Dialog{
 
 
     void initViews() {
+        pb= (ProgressBar) findViewById(R.id.pb_ipd);
+        pb.setVisibility(View.INVISIBLE);
         addr_tv = (TextView) findViewById(R.id.addr_table_ipd);
         name_tv = (TextView) findViewById(R.id.name_table_ipd);
         count_tv = (TextView) findViewById(R.id.count_table_ipd);
@@ -65,6 +69,7 @@ public class IncompletePrepareMarkerDialog extends Dialog{
         serveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                pb.setVisibility(View.VISIBLE);
                 final DatabaseReference myref = database.getReference("prepare").child(rid);
                 myref.child("distributor_assigned").setValue(true).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
@@ -72,11 +77,11 @@ public class IncompletePrepareMarkerDialog extends Dialog{
                         myref.child("distributor_id").setValue(did).addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {
-                                myref.child("distributor_name").setValue(SelectSHType.name).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                myref.child("distributor_name").setValue(MyActivity.name).addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
                                     public void onSuccess(Void aVoid) {
                                         DatabaseReference ref = database.getReference("users").child(did).child("sh2");
-                                        myref.child("distributor_phone").setValue(SelectSHType.phone);
+                                        myref.child("distributor_phone").setValue(MyActivity.phone);
                                         database.getReference("users").child(did).addChildEventListener(new ChildEventListener() {
                                             @Override
                                             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
@@ -111,7 +116,9 @@ public class IncompletePrepareMarkerDialog extends Dialog{
                                             @Override
                                             public void onSuccess(Void aVoid) {
                                                 showToast(getContext(),"Connected successfully!");
+                                                pb.setVisibility(View.INVISIBLE);
                                                 c.startActivity(new Intent(c,SelectSHType.class));
+                                                c.finish();
                                             }
                                         });
                                     }

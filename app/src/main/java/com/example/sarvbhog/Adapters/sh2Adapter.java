@@ -21,6 +21,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -56,19 +58,22 @@ public class sh2Adapter extends RecyclerView.Adapter<sh2Adapter.MyViewHolder> {
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         TextView addr_tv, name_tv, phone_tv, count_tv, dis_tv,foodtype_tv,dis_phone_tv;
-        Button delete_btn;
+        ImageView delete_iv;
+        ProgressBar pb;
         public MyViewHolder(View view) {
             super(view);
+            pb = (ProgressBar) view.findViewById(R.id.pb_list_item_ps);
+            pb.setVisibility(View.INVISIBLE);
             dis_tv = (TextView) view.findViewById(R.id.distributor_tv_ps);
             name_tv = (TextView) view.findViewById(R.id.name_tv_ps);
             phone_tv = (TextView) view.findViewById(R.id.phone_tv_ps);
             count_tv = (TextView) view.findViewById(R.id.count_tv_ps);
             addr_tv = (TextView) view.findViewById(R.id.location_tv_ps);
             dis_phone_tv = (TextView) view.findViewById(R.id.distributorphone_tv_ps);
-            delete_btn = (Button) view.findViewById(R.id.delete_btn_ps);
+            delete_iv = (ImageView) view.findViewById(R.id.delete_iv_ps);
             foodtype_tv = (TextView) view.findViewById(R.id.foodtype_tv_ps);
 
-            delete_btn.setText("Disconnect");
+            delete_iv.setImageResource(R.drawable.ic_cancel_black_24dp);
         }
     }
 
@@ -100,9 +105,10 @@ public class sh2Adapter extends RecyclerView.Adapter<sh2Adapter.MyViewHolder> {
         holder.name_tv.setText(r.name);
         holder.dis_phone_tv.setText(r.distributor_phone);
         holder.foodtype_tv.setText(r.foodType);
-        holder.delete_btn.setOnClickListener(new View.OnClickListener() {
+        holder.delete_iv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                holder.pb.setVisibility(View.VISIBLE);
                 final String rid = rids.get(position);
                 final String pid = push_ids.remove(position);
                 final int c = r.count;
@@ -142,6 +148,7 @@ public class sh2Adapter extends RecyclerView.Adapter<sh2Adapter.MyViewHolder> {
                     }
                 });
                 requests.remove(position);
+                holder.pb.setVisibility(View.INVISIBLE);
                 showToast(context,"Disconnected Successfully!");
                 notifyDataSetChanged();
             }

@@ -1,11 +1,14 @@
 package com.example.sarvbhog.Adapters;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -13,13 +16,11 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.sarvbhog.Classes.RequestClass;
-import com.example.sarvbhog.CommonFunctions;
 import com.example.sarvbhog.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
@@ -45,17 +46,20 @@ public class sh1Adapter extends RecyclerView.Adapter<sh1Adapter.MyViewHolder> {
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         TextView addr_tv, name_tv, phone_tv, count_tv, dis_tv,dis_phone_tv;
-        Button delete_btn;
+        ImageView delete_iv;
+        ProgressBar pb;
         public MyViewHolder(View view) {
             super(view);
+            pb = (ProgressBar) view.findViewById(R.id.pb_list_item_rs);
+            pb.setVisibility(View.INVISIBLE);
             dis_tv = (TextView) view.findViewById(R.id.distributor_tv_rs);
             name_tv = (TextView) view.findViewById(R.id.name_tv_rs);
             phone_tv = (TextView) view.findViewById(R.id.phone_tv_rs);
             count_tv = (TextView) view.findViewById(R.id.count_tv_rs);
             addr_tv = (TextView) view.findViewById(R.id.location_tv_rs);
             dis_phone_tv = (TextView) view.findViewById(R.id.distributorphone_tv_rs);
-            delete_btn = (Button) view.findViewById(R.id.delete_btn_rs);
-            delete_btn.setText("Disconnect");
+            delete_iv = (ImageView) view.findViewById(R.id.delete_iv_rs);
+            delete_iv.setImageResource(R.drawable.ic_cancel_black_24dp);
         }
     }
 
@@ -88,9 +92,10 @@ public class sh1Adapter extends RecyclerView.Adapter<sh1Adapter.MyViewHolder> {
         holder.phone_tv.setText(r.phone);
         holder.name_tv.setText(r.name);
         holder.dis_phone_tv.setText(r.distributor_phone);
-        holder.delete_btn.setOnClickListener(new View.OnClickListener() {
+        holder.delete_iv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                holder.pb.setVisibility(View.VISIBLE);
                 final String rid = rids.get(position);
                 final String pid = push_ids.get(position);
                 final int c = r.count;
@@ -130,6 +135,7 @@ public class sh1Adapter extends RecyclerView.Adapter<sh1Adapter.MyViewHolder> {
                     }
                 });
                 requests.remove(position);
+                holder.pb.setVisibility(View.INVISIBLE);
                 showToast(context,"Disconnected Successfully!");
                 notifyDataSetChanged();
             }

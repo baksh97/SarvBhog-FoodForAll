@@ -18,6 +18,7 @@ import android.widget.Toast;
 import com.example.sarvbhog.Adapters.producersAdapter;
 import com.example.sarvbhog.Classes.ProducerClass;
 import com.example.sarvbhog.Classes.RequestClass;
+import com.example.sarvbhog.MyActivity;
 import com.example.sarvbhog.R;
 import com.example.sarvbhog.SelectSHType;
 import com.google.firebase.database.ChildEventListener;
@@ -113,7 +114,8 @@ public class PrepareStatus extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        startActivity(new Intent(this, SelectSHType.class));
+        startActivity(new Intent(this, MyActivity.class));
+        finish();
     }
 
     @Override

@@ -6,6 +6,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
@@ -17,7 +19,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import static com.example.sarvbhog.CommonFunctions.showToast;
 
@@ -37,15 +38,18 @@ public class requestsAdapter extends RecyclerView.Adapter<requestsAdapter.MyView
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         TextView addr_tv, name_tv, phone_tv, count_tv, dis_tv, dis_phone_tv;
-        Button delete_btn;
+        ImageView delete_iv;
+        ProgressBar pb;
         public MyViewHolder(View view) {
             super(view);
+            pb = (ProgressBar) view.findViewById(R.id.pb_list_item_rs);
+            pb.setVisibility(View.INVISIBLE);
             dis_tv = (TextView) view.findViewById(R.id.distributor_tv_rs);
             name_tv = (TextView) view.findViewById(R.id.name_tv_rs);
             phone_tv = (TextView) view.findViewById(R.id.phone_tv_rs);
             count_tv = (TextView) view.findViewById(R.id.count_tv_rs);
             addr_tv = (TextView) view.findViewById(R.id.location_tv_rs);
-            delete_btn = (Button) view.findViewById(R.id.delete_btn_rs);
+            delete_iv = (ImageView) view.findViewById(R.id.delete_iv_rs);
             dis_phone_tv = (TextView) view.findViewById(R.id.distributorphone_tv_rs);
         }
     }
@@ -76,9 +80,10 @@ public class requestsAdapter extends RecyclerView.Adapter<requestsAdapter.MyView
         holder.phone_tv.setText(r.phone);
         holder.name_tv.setText(r.name);
         holder.dis_phone_tv.setText(r.distributor_phone);
-        holder.delete_btn.setOnClickListener(new View.OnClickListener() {
+        holder.delete_iv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                holder.pb.setVisibility(View.VISIBLE);
                 DatabaseReference myref = database.getReference("requests").child(rids.get(position));
                 Log.d(TAG,rids.get(position));
                 myref.removeValue();
@@ -90,6 +95,7 @@ public class requestsAdapter extends RecyclerView.Adapter<requestsAdapter.MyView
 
                 requests.remove(position);
                 rids.remove(position);
+                holder.pb.setVisibility(View.INVISIBLE);
                 showToast(context,"Deleted Successfully!");
                 notifyDataSetChanged();
 

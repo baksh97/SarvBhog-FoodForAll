@@ -13,8 +13,10 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.example.sarvbhog.MyActivity;
 import com.example.sarvbhog.R;
 import com.example.sarvbhog.SelectSHType;
 import com.google.android.gms.auth.api.Auth;
@@ -52,11 +54,12 @@ public class Login extends AppCompatActivity implements GoogleApiClient.Connecti
     private FirebaseAuth mAuth;
     FirebaseDatabase database = FirebaseDatabase.getInstance();
     private String mVerificationId;
-    private PhoneAuthProvider.ForceResendingToken mResendToken;
+    public static PhoneAuthProvider.ForceResendingToken mResendToken;
 
+    ProgressBar pb;
     Button sendCodeBtn;
     //    private Scene scene1, scene2;
-    private PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks;
+    public static PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks;
     private GoogleApiClient mGoogleApiClient;
 //    private LayoutInflater layoutInflater;
 //    private ViewGroup root;
@@ -68,6 +71,7 @@ public class Login extends AppCompatActivity implements GoogleApiClient.Connecti
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
+                        pb.setVisibility(View.INVISIBLE);
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithCredential:success");
@@ -75,10 +79,10 @@ public class Login extends AppCompatActivity implements GoogleApiClient.Connecti
 
                             FirebaseUser user = task.getResult().getUser();
                             CodeVerify.updateUI(user);
-                            startActivity(new Intent(thisContext, SelectSHType.class));
+//                            pb.setVisibility(View.INVISIBLE);
+                            Intent intent = new Intent(thisContext, MyActivity.class);
+                            startActivity(intent);
                             finish();
-//                            startActivity(new Intent(PhoneLogin.this, HomeScreen.class));
-                            // ...
                         } else {
                             // Sign in failed, display a message and update the UI
                             Log.w(TAG, "signInWithCredential:failure", task.getException());
@@ -101,6 +105,8 @@ public class Login extends AppCompatActivity implements GoogleApiClient.Connecti
 //        View codeView = layoutInflater.inflate(R.layout.code_enter,null);
 
 
+        pb = (ProgressBar) findViewById(R.id.pb_login);
+        pb.setVisibility(View.INVISIBLE);
         phoneEt = (EditText) findViewById(R.id.phone_et_login);
         sendCodeBtn = (Button) findViewById(R.id.sendcode_btn_login);
 
@@ -154,6 +160,10 @@ public class Login extends AppCompatActivity implements GoogleApiClient.Connecti
                 mResendToken = token;
                 Intent intent = new Intent(thisContext, CodeVerify.class);
                 intent.putExtra("mVerificationId", mVerificationId);
+                pb.setVisibility(View.INVISIBLE);
+                String phoneNumber = phoneEt.getText().toString();
+                intent.putExtra("phone",phoneNumber);
+                intent.putExtra("c_act", "login");
                 startActivity(intent);
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
 
@@ -206,7 +216,6 @@ public class Login extends AppCompatActivity implements GoogleApiClient.Connecti
                 mCallbacks
         );
 
-//        startActivity(new);
 
 //        Transition slide = new Slide(Gravity.RIGHT);
 //        TransitionManager.go(scene2,slide);
@@ -225,7 +234,6 @@ public class Login extends AppCompatActivity implements GoogleApiClient.Connecti
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-//        layoutInflater.in
 
 
 
@@ -237,28 +245,34 @@ public class Login extends AppCompatActivity implements GoogleApiClient.Connecti
         sendCodeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String phoneNumber = phoneEt.getText().toString();
-                DatabaseReference myref = database.getReference("users");
-                myref.orderByChild("phone").equalTo(phoneNumber).addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.getValue() != null){
-                            //it means user already registered
-                            //Add code to show your prompt
-                            sendCode();
-                        }else{
-                            //It is new users
-                            //write an entry to your user table
-                            showToast(thisContext,"You have not registered before! Please register first!");
-                            //writeUserEntryToDB();
+                if(phoneEt.getText().toString().equals("")){
+                    showToast(thisContext, "Please fill in the mobile number!");
+                }else {
+                    pb.setVisibility(View.VISIBLE);
+                    String phoneNumber = phoneEt.getText().toString();
+                    DatabaseReference myref = database.getReference("users");
+                    myref.orderByChild("phone").equalTo(phoneNumber).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.getValue() != null) {
+                                //it means user already registered
+                                //Add code to show your prompt
+                                sendCode();
+                            } else {
+                                //It is new users
+                                //write an entry to your user table
+                                pb.setVisibility(View.INVISIBLE);
+                                showToast(thisContext, "You have not registered before! Please register first!");
+                                //writeUserEntryToDB();
+                            }
                         }
-                    }
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                    }
-                });
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+                            pb.setVisibility(View.INVISIBLE);
+                        }
+                    });
+                }
             }
         });
 

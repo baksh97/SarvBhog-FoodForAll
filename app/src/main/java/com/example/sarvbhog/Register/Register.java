@@ -14,11 +14,13 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.sarvbhog.MyActivity;
 import com.example.sarvbhog.R;
 import com.example.sarvbhog.SelectSHType;
 import com.google.android.gms.auth.api.Auth;
@@ -51,6 +53,7 @@ import static com.example.sarvbhog.CommonFunctions.showToast;
 public class Register extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,GoogleApiClient.OnConnectionFailedListener{
 
     EditText phoneEt,nameET;
+    ProgressBar pb;
     TextView login_tv;
     String entity;
 
@@ -66,12 +69,12 @@ public class Register extends AppCompatActivity implements GoogleApiClient.Conne
     private FirebaseAuth mAuth;
     private String mVerificationId;
     private String name, phone;
-    private PhoneAuthProvider.ForceResendingToken mResendToken;
+    public static PhoneAuthProvider.ForceResendingToken mResendToken;
 
     RadioGroup rg;
     Button sendCodeBtn;
     //    private Scene scene1, scene2;
-    private PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks;
+    public static PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks;
     private GoogleApiClient mGoogleApiClient;
 //    private LayoutInflater layoutInflater;
 //    private ViewGroup root;
@@ -81,6 +84,7 @@ public class Register extends AppCompatActivity implements GoogleApiClient.Conne
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
+                        pb.setVisibility(View.INVISIBLE);
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithCredential:success");
@@ -96,17 +100,17 @@ public class Register extends AppCompatActivity implements GoogleApiClient.Conne
                             myref.child(user.getUid()).child("producers_connected").setValue(0);
                             myref.child(user.getUid()).child("entity").setValue(entity);
 
-                            database.getReference(entity).child(user.getUid());
-
+                            database.getReference(entity).push().setValue(user.getUid());
                             showToast(thisContext,"Registration Successful!");
-                            startActivity(new Intent(thisContext, SelectSHType.class));
+//                            pb.setVisibility(View.INVISIBLE);
+                            startActivity(new Intent(thisContext, MyActivity.class));
                             finish();
 //                            startActivity(new Intent(PhoneLogin.this, HomeScreen.class));
                             // ...
                         } else {
                             // Sign in failed, display a message and update the UI
                             Log.w(TAG, "signInWithCredential:failure", task.getException());
-                            showToast(thisContext,"Login unsuccessful!");
+                            showToast(thisContext,"Registration unsuccessful! Error: "+task.getException().getMessage());
                             if (task.getException() instanceof FirebaseAuthInvalidCredentialsException) {
                                 // The verification code entered was invalid
                             }
@@ -128,6 +132,8 @@ public class Register extends AppCompatActivity implements GoogleApiClient.Conne
 //        View codeView = layoutInflater.inflate(R.layout.code_enter,null);
 
 
+        pb = (ProgressBar) findViewById(R.id.pb_register);
+        pb.setVisibility(View.INVISIBLE);
         login_tv = (TextView) findViewById(R.id.login_tv_register);
         nameET = ((TextInputLayout) findViewById(R.id.name_til_register)).getEditText();
         phoneEt = ((TextInputLayout) findViewById(R.id.phone_til_phoneenter)).getEditText();
@@ -193,6 +199,8 @@ public class Register extends AppCompatActivity implements GoogleApiClient.Conne
                 intent.putExtra("name",name);
                 intent.putExtra("phone",phone);
                 intent.putExtra("entity",entity);
+                intent.putExtra("c_act", "register");
+                pb.setVisibility(View.INVISIBLE);
                 startActivity(intent);
 //                finish();
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
@@ -275,6 +283,7 @@ public class Register extends AppCompatActivity implements GoogleApiClient.Conne
                 if(rg.getCheckedRadioButtonId()==-1 || phoneEt.getText().toString().equals("") || nameET.getText().toString().equals("")){
                     showToast(thisContext,"Please complete all the information!");
                 }else{
+                    pb.setVisibility(View.VISIBLE);
                     name = nameET.getText().toString();
                     phone = phoneEt.getText().toString();
                     int selectedId=rg.getCheckedRadioButtonId();
@@ -287,6 +296,7 @@ public class Register extends AppCompatActivity implements GoogleApiClient.Conne
                                 //it means user already registered
                                 //Add code to show your prompt
 
+                                pb.setVisibility(View.INVISIBLE);
                                 showToast(thisContext,"User already exists! Please log in!");
                             }else{
                                 //It is new users
@@ -298,7 +308,7 @@ public class Register extends AppCompatActivity implements GoogleApiClient.Conne
 
                         @Override
                         public void onCancelled(@NonNull DatabaseError databaseError) {
-
+                            pb.setVisibility(View.INVISIBLE);
                         }
                     });
                 }

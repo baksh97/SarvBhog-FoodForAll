@@ -74,14 +74,14 @@ import static com.example.sarvbhog.CommonFunctions.showToast;
 
 public class SelectSHType extends AppCompatActivity implements GoogleMap.OnMarkerClickListener, OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener {
 
-    Button request, prepare, distribute;
+//    Button request, prepare, distribute;
     private FirebaseAuth mAuth;
 
 //    static final String COARSE_LOCATION =
 
     FirebaseDatabase database = FirebaseDatabase.getInstance();
 
-    public static String name="",phone="";
+//    public static String name="",phone="";
 
     public static boolean isFromSetting = false;
 
@@ -98,9 +98,9 @@ public class SelectSHType extends AppCompatActivity implements GoogleMap.OnMarke
     //widgets
     private EditText mSearchText;
     private TextView markerInfo_tv;
-    private ImageView mGps, ic_search, ic_cancel;
+    private ImageView mGps, ic_search, ic_cancel, ic_info;
     private GoogleMap mMap;
-    private FloatingActionButton request_fab, register_fab;
+//    private FloatingActionButton request_fab, register_fab;
     private FusedLocationProviderClient mFusedLocationProviderClient;
 
     //vars
@@ -125,9 +125,11 @@ public class SelectSHType extends AppCompatActivity implements GoogleMap.OnMarke
     String lastFetchedLocation = "", lastState="", lastCity="";
     double lastFetchedLon, lastFetchedLat;
 
+    HashMap<String,String> infoMap;
     HashMap<String, HashMap<String,String>> requestsMarkers, preparemarkers, tempMarkers;
 
     Context thisContext = SelectSHType.this;
+    Activity thisAct = this;
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
@@ -414,81 +416,108 @@ public class SelectSHType extends AppCompatActivity implements GoogleMap.OnMarke
 
         mAuth = FirebaseAuth.getInstance();
 
-        if(mAuth.getCurrentUser()!=null){
-            DatabaseReference myref = database.getReference("users").child(mAuth.getCurrentUser().getUid());
-            myref.addChildEventListener(new ChildEventListener() {
-                @Override
-                public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                    String key = dataSnapshot.getKey();
-                    String value = dataSnapshot.getValue().toString();
-                    if(key.equals("name")){
-                        name=dataSnapshot.getValue().toString();
-                    }
-                    else if(key.equals("phone")){
-                        phone = value;
-                    }
-                }
-
-                @Override
-                public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-                }
-
-                @Override
-                public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-
-                }
-
-                @Override
-                public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
-            });
-        }
+//        if(mAuth.getCurrentUser()!=null){
+//            DatabaseReference myref = database.getReference("users").child(mAuth.getCurrentUser().getUid());
+//            myref.addChildEventListener(new ChildEventListener() {
+//                @Override
+//                public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+//                    String key = dataSnapshot.getKey();
+//                    String value = dataSnapshot.getValue().toString();
+//                    if(key.equals("name")){
+//                        name=dataSnapshot.getValue().toString();
+//                    }
+//                    else if(key.equals("phone")){
+//                        phone = value;
+//                    }
+//                }
+//
+//                @Override
+//                public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+//
+//                }
+//
+//                @Override
+//                public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+//
+//                }
+//
+//                @Override
+//                public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+//
+//                }
+//
+//                @Override
+//                public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+//                }
+//            });
+//        }
 
         mSearchText = (EditText) findViewById(R.id.input_search);
         ic_search = (ImageView) findViewById(R.id.ic_search);
+        ic_info = (ImageView) findViewById(R.id.marker_info_btn_sst);
+        ic_info.setVisibility(View.INVISIBLE);
         ic_cancel = (ImageView) findViewById(R.id.cancel_iv_rp1);
         mGps = (ImageView) findViewById(R.id.ic_gps);
-        request_fab = (FloatingActionButton) findViewById(R.id.request_fab_sst);
-        register_fab = (FloatingActionButton) findViewById(R.id.register_fab_sst);
 
-
-
-        register_fab.setOnClickListener(new View.OnClickListener() {
+        ic_info.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(mAuth.getCurrentUser()!=null){
-                    showToast(thisContext,"Already Signed in!");
-                }
-                else {
-                    startActivity(new Intent(thisContext,Register.class));
+                HashMap<String,String> m = infoMap;
+                if (!m.keySet().contains("foodType")) {
+                    if (m.get("distributor_assigned").equals("false")) {
+                        IncompleteRequestMarkerDialog dialog = new IncompleteRequestMarkerDialog(thisAct, m.get("name"), m.get("addr"), m.get("count"), m.get("rid"), m.get("phone"), mAuth.getCurrentUser().getUid());
+                        dialog.show();
+                    } else {
+                        CompleteRequestMarkerDialog dialog = new CompleteRequestMarkerDialog(thisAct, m.get("name"), m.get("addr"), m.get("count"), m.get("rid"), m.get("phone"), m.get("distributor_id"),m.get("distributor_name"),m.get("distributor_phone"));
+                        dialog.show();
+                    }
+                } else {
+                    if (m.get("distributor_assigned").equals("false")) {
+                        IncompletePrepareMarkerDialog dialog = new IncompletePrepareMarkerDialog(thisAct, m.get("name"), m.get("addr"), m.get("foodType"), m.get("count"), m.get("pid"), m.get("phone"), mAuth.getCurrentUser().getUid());
+                        dialog.show();
+                    } else {
+                        CompletePrepareMarkerDialog dialog = new CompletePrepareMarkerDialog(thisAct, m.get("name"), m.get("addr"), m.get("foodType"), m.get("count"), m.get("pid"), m.get("phone"), m.get("distributor_id"),m.get("distributor_name"),m.get("distributor_phone"));
+                        dialog.show();
+                    }
                 }
             }
         });
-        
-        request_fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(currentMarker==null){
-                    showToast(thisContext, "Please select a location!");
-                }
-                else {
-                    Intent intent = new Intent(thisContext, RequestPacket2.class);
-                    intent.putExtra("lat", lastFetchedLat);
-                    intent.putExtra("lon", lastFetchedLon);
-                    intent.putExtra("addr", lastFetchedLocation);
-                    intent.putExtra("city", lastCity);
-                    intent.putExtra("state", lastState);
-                    startActivity(intent);
-                }
-            }
-        });
+
+//        request_fab = (FloatingActionButton) findViewById(R.id.request_fab_sst);
+//        register_fab = (FloatingActionButton) findViewById(R.id.register_fab_sst);
+
+
+
+//        register_fab.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                if(mAuth.getCurrentUser()!=null){
+//                    showToast(thisContext,"Already Signed in!");
+//                }
+//                else {
+//                    startActivity(new Intent(thisContext,Register.class));
+//                }
+//            }
+//        });
+//
+//        request_fab.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                if(currentMarker==null){
+//                    showToast(thisContext, "Please select a location!");
+//                }
+//                else {
+//                    Intent intent = new Intent(thisContext, RequestPacket2.class);
+//                    intent.putExtra("lat", lastFetchedLat);
+//                    intent.putExtra("lon", lastFetchedLon);
+//                    intent.putExtra("addr", lastFetchedLocation);
+//                    intent.putExtra("city", lastCity);
+//                    intent.putExtra("state", lastState);
+//                    startActivity(intent);
+//                }
+//            }
+//        });
 
         ic_search.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -537,8 +566,7 @@ public class SelectSHType extends AppCompatActivity implements GoogleMap.OnMarke
             Log.d(TAG, "geoLocate: found a location: " + address.toString());
             String addr = getAddressFromLocation(new LatLng(address.getLatitude(),address.getLongitude()));
 
-            moveCamera(new LatLng(address.getLatitude(), address.getLongitude()), DEFAULT_ZOOM,
-                    address.getAddressLine(0));
+            moveCamera(new LatLng(address.getLatitude(), address.getLongitude()), DEFAULT_ZOOM);
         }
     }
 
@@ -563,7 +591,7 @@ public class SelectSHType extends AppCompatActivity implements GoogleMap.OnMarke
 //                            lastFetchedLat = currentLocation.getLatitude();
 //                            lastFetchedLon = currentLocation.getLongitude();
 //                            lastFetchedLocation = addr;
-                                moveCamera(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()), DEFAULT_ZOOM, "My Location");
+                                moveCamera(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()), DEFAULT_ZOOM);
                                 currentMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude())));
                             }
 
@@ -579,18 +607,17 @@ public class SelectSHType extends AppCompatActivity implements GoogleMap.OnMarke
         }
     }
 
-    private void moveCamera(LatLng latLng, float zoom, String title){
+    private void moveCamera(LatLng latLng, float zoom){
         Log.d(TAG, "moveCamera: moving the camera to: lat: " + latLng.latitude + ", lng: " + latLng.longitude );
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
-
-        if(!title.equals("My Location")){
-            MarkerOptions options = new MarkerOptions()
-                    .position(latLng)
-                    .title(title);
-//            mMap.clear();
-            if(currentMarker!=null)currentMarker.remove();
-            currentMarker = mMap.addMarker(options);
-        }
+//        if(!title.equals("My Location")){
+//            MarkerOptions options = new MarkerOptions()
+//                    .position(latLng)
+//                    .title(title);
+////            mMap.clear();
+//            if(currentMarker!=null)currentMarker.remove();
+////            currentMarker = mMap.addMarker(options);
+//        }
 
         hideSoftKeyboard();
     }
@@ -614,68 +641,79 @@ public class SelectSHType extends AppCompatActivity implements GoogleMap.OnMarke
         // String name, String addr, String count, String rid, String phone, String did
 //        marker.
         HashMap<String,String> m = (HashMap<String, String>) marker.getTag();
-
-        if (doublePressForDetail) {
-            Log.d(TAG,"pressedMarker: "+pressedMarker+" and marker.getid: "+marker.getId());
-            if(pressedMarker.equals(marker.getId())) {
-                if (mAuth.getCurrentUser() == null) {
-                    showToast(thisContext, "You need to sign in to access this!");
-                } else {
-                    if (!m.keySet().contains("foodType")) {
-                        if (m.get("distributor_assigned").equals("false")) {
-                            IncompleteRequestMarkerDialog dialog = new IncompleteRequestMarkerDialog(this, m.get("name"), m.get("addr"), m.get("count"), m.get("rid"), m.get("phone"), mAuth.getCurrentUser().getUid());
-                            dialog.show();
-                        } else {
-                            CompleteRequestMarkerDialog dialog = new CompleteRequestMarkerDialog(this, m.get("name"), m.get("addr"), m.get("count"), m.get("rid"), m.get("phone"), m.get("distributor_id"),m.get("distributor_name"),m.get("distributor_phone"));
-                            dialog.show();
-                        }
-                    } else {
-                        if (m.get("distributor_assigned").equals("false")) {
-                            IncompletePrepareMarkerDialog dialog = new IncompletePrepareMarkerDialog(this, m.get("name"), m.get("addr"), m.get("foodType"), m.get("count"), m.get("pid"), m.get("phone"), mAuth.getCurrentUser().getUid());
-                            dialog.show();
-                        } else {
-                            CompletePrepareMarkerDialog dialog = new CompletePrepareMarkerDialog(this, m.get("name"), m.get("addr"), m.get("foodType"), m.get("count"), m.get("pid"), m.get("phone"), m.get("distributor_id"),m.get("distributor_name"),m.get("distributor_phone"));
-                            dialog.show();
-                        }
-                    }
-                }
-            }
-            else{
-                if(currentMarker==null || !marker.getId().equals(currentMarker.getId())) {
-                    h.removeCallbacks(r);
-                    doublePressForDetail = true;
-                    pressedMarker = marker.getId();
-                    r = new Runnable() {
-                        @Override
-                        public void run() {
-                            doublePressForDetail = false;
-                            pressedMarker = "";
-                        }
-                    };
-                    h.postDelayed(r, 2000);
-                }
-            }
-
-        } else {
-            if(currentMarker==null || !marker.getId().equals(currentMarker.getId())) {
-                Log.d(TAG, "here with doublwPress: " + doublePressForDetail);
-                this.doublePressForDetail = true;
-                pressedMarker = marker.getId();
-
-
-                r = new Runnable() {
-                    @Override
-                    public void run() {
-                        doublePressForDetail = false;
-                        pressedMarker = "";
-                    }
-                };
-                h.postDelayed(r, 2000);
-            }
+        if(m!=null){
+            LatLng ltlng = marker.getPosition();
+            moveCamera(ltlng, DEFAULT_ZOOM);
+            ic_info.setVisibility(View.VISIBLE);
+            infoMap = m;
+        }
+        else{
+            ic_info.setVisibility(View.INVISIBLE);
         }
 
-        String title = marker.getTitle();
-        marker.getTag();
+
+
+//        if (doublePressForDetail) {
+//            Log.d(TAG,"pressedMarker: "+pressedMarker+" and marker.getid: "+marker.getId());
+//            if(pressedMarker.equals(marker.getId())) {
+//                if (mAuth.getCurrentUser() == null) {
+//                    showToast(thisContext, "You need to sign in to access this!");
+//                } else {
+//                    if (!m.keySet().contains("foodType")) {
+//                        if (m.get("distributor_assigned").equals("false")) {
+//                            IncompleteRequestMarkerDialog dialog = new IncompleteRequestMarkerDialog(this, m.get("name"), m.get("addr"), m.get("count"), m.get("rid"), m.get("phone"), mAuth.getCurrentUser().getUid());
+//                            dialog.show();
+//                        } else {
+//                            CompleteRequestMarkerDialog dialog = new CompleteRequestMarkerDialog(this, m.get("name"), m.get("addr"), m.get("count"), m.get("rid"), m.get("phone"), m.get("distributor_id"),m.get("distributor_name"),m.get("distributor_phone"));
+//                            dialog.show();
+//                        }
+//                    } else {
+//                        if (m.get("distributor_assigned").equals("false")) {
+//                            IncompletePrepareMarkerDialog dialog = new IncompletePrepareMarkerDialog(this, m.get("name"), m.get("addr"), m.get("foodType"), m.get("count"), m.get("pid"), m.get("phone"), mAuth.getCurrentUser().getUid());
+//                            dialog.show();
+//                        } else {
+//                            CompletePrepareMarkerDialog dialog = new CompletePrepareMarkerDialog(this, m.get("name"), m.get("addr"), m.get("foodType"), m.get("count"), m.get("pid"), m.get("phone"), m.get("distributor_id"),m.get("distributor_name"),m.get("distributor_phone"));
+//                            dialog.show();
+//                        }
+//                    }
+//                }
+//            }
+//            else{
+//                if(currentMarker==null || !marker.getId().equals(currentMarker.getId())) {
+//                    h.removeCallbacks(r);
+//                    doublePressForDetail = true;
+//                    pressedMarker = marker.getId();
+//                    r = new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            doublePressForDetail = false;
+//                            pressedMarker = "";
+//                        }
+//                    };
+//                    h.postDelayed(r, 2000);
+//                }
+//            }
+//
+//        } else {
+//            if(currentMarker==null || !marker.getId().equals(currentMarker.getId())) {
+//                Log.d(TAG, "here with doublwPress: " + doublePressForDetail);
+//                this.doublePressForDetail = true;
+//                pressedMarker = marker.getId();
+//
+//
+//                r = new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        doublePressForDetail = false;
+//                        pressedMarker = "";
+//                    }
+//                };
+//                h.postDelayed(r, 2000);
+//            }
+//        }
+
+//        String title = marker.getTitle();
+//        marker.getTag();
         return true;
     }
 
@@ -706,17 +744,7 @@ public class SelectSHType extends AppCompatActivity implements GoogleMap.OnMarke
         final LocationManager manager = (LocationManager) getSystemService( Context.LOCATION_SERVICE );
 
         if ( !manager.isProviderEnabled( LocationManager.GPS_PROVIDER ) ) {
-//            if(f) {
-//                new Handler().postDelayed(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        checkGPS(!f);
-//                    }
-//                }, 2000);
-//            }
-//            else{
                 buildAlertMessageNoGps();
-//            }
         }else{
             if(f){
                 if (MapFunctions.isServicesOK(this)) {
@@ -751,57 +779,57 @@ public class SelectSHType extends AppCompatActivity implements GoogleMap.OnMarke
 
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (mAuth.getCurrentUser() != null || id==R.id.request_status) {
-            switch (id) {
-                case R.id.profile:
-                    startActivity(new Intent(thisContext, Profile.class));
-                    return true;
-                case R.id.prepare:
-                    if(currentMarker==null){
-                        showToast(thisContext, "Please select a location!");
-                    }
-                    else {
-                        Intent intent = new Intent(thisContext, PreparePacket.class);
-                        intent.putExtra("lat", lastFetchedLat);
-                        intent.putExtra("lon", lastFetchedLon);
-                        intent.putExtra("addr", lastFetchedLocation);
-                        intent.putExtra("city", lastCity);
-                        intent.putExtra("state", lastState);
-//                    intent.putExtra("Class", PreparePacket.class);
-
-                        startActivity(intent);
-                    }
-                    return true;
-                case R.id.request_status:
-                    startActivity(new Intent(thisContext, RequestStatus.class));
-                    return true;
-                case R.id.prepare_status:
-                    startActivity(new Intent(thisContext, PrepareStatus.class));
-                    return true;
-                case R.id.sign_out:
-                    mAuth.signOut();
-                    name="";
-                    phone="";
-                    return true;
-                default:
-                    return super.onOptionsItemSelected(item);
-            }
-        }
-        else{
-            showToast(thisContext, "You need to login to access this!");
-            return true;
-        }
-    }
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        // Inflate the menu; this adds items to the action bar if it is present.
+//        getMenuInflater().inflate(R.menu.menu, menu);
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean onOptionsItemSelected(MenuItem item) {
+//        int id = item.getItemId();
+//        if (mAuth.getCurrentUser() != null || id==R.id.request_status) {
+//            switch (id) {
+//                case R.id.profile:
+//                    startActivity(new Intent(thisContext, Profile.class));
+//                    return true;
+//                case R.id.prepare:
+//                    if(currentMarker==null){
+//                        showToast(thisContext, "Please select a location!");
+//                    }
+//                    else {
+//                        Intent intent = new Intent(thisContext, PreparePacket.class);
+//                        intent.putExtra("lat", lastFetchedLat);
+//                        intent.putExtra("lon", lastFetchedLon);
+//                        intent.putExtra("addr", lastFetchedLocation);
+//                        intent.putExtra("city", lastCity);
+//                        intent.putExtra("state", lastState);
+////                    intent.putExtra("Class", PreparePacket.class);
+//
+//                        startActivity(intent);
+//                    }
+//                    return true;
+//                case R.id.request_status:
+//                    startActivity(new Intent(thisContext, RequestStatus.class));
+//                    return true;
+//                case R.id.prepare_status:
+//                    startActivity(new Intent(thisContext, PrepareStatus.class));
+//                    return true;
+//                case R.id.sign_out:
+//                    mAuth.signOut();
+//                    name="";
+//                    phone="";
+//                    return true;
+//                default:
+//                    return super.onOptionsItemSelected(item);
+//            }
+//        }
+//        else{
+//            showToast(thisContext, "You need to login to access this!");
+//            return true;
+//        }
+//    }
 
     private void checkPermissions() {
 //        Log.d(TAG, "getLocationPermission: getting location permissions");
@@ -840,11 +868,5 @@ public class SelectSHType extends AppCompatActivity implements GoogleMap.OnMarke
         }
     }
 
-    @Override
-    public void onBackPressed() {
-        Intent a = new Intent(Intent.ACTION_MAIN);
-        a.addCategory(Intent.CATEGORY_HOME);
-        a.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(a);
-    }
+
 }

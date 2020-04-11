@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -26,6 +27,7 @@ public class IncompleteRequestMarkerDialog extends Dialog{
     public Activity c;
     public Dialog d;
     TextView addr_tv,count_tv,name_tv,phone_tv;
+    ProgressBar pb;
     Button serveBtn,cancelBtn;
     FirebaseDatabase database = FirebaseDatabase.getInstance();
 
@@ -50,6 +52,8 @@ public class IncompleteRequestMarkerDialog extends Dialog{
 
 
     void initViews() {
+        pb = (ProgressBar) findViewById(R.id.pb_ird);
+        pb.setVisibility(View.INVISIBLE);
         addr_tv = (TextView) findViewById(R.id.addr_table_ird);
         name_tv = (TextView) findViewById(R.id.name_table_ird);
         count_tv = (TextView) findViewById(R.id.count_table_ird);
@@ -65,6 +69,7 @@ public class IncompleteRequestMarkerDialog extends Dialog{
         serveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                pb.setVisibility(View.VISIBLE);
                 final DatabaseReference myref = database.getReference("requests").child(rid);
                 myref.child("distributor_assigned").setValue(true).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
@@ -72,11 +77,11 @@ public class IncompleteRequestMarkerDialog extends Dialog{
                         myref.child("distributor_id").setValue(did).addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {
-                                myref.child("distributor_name").setValue(SelectSHType.name).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                myref.child("distributor_name").setValue(MyActivity.name).addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
                                     public void onSuccess(Void aVoid) {
                                         final DatabaseReference ref = database.getReference("users").child(did).child("sh1");
-                                        myref.child("distributor_phone").setValue(SelectSHType.phone);
+                                        myref.child("distributor_phone").setValue(MyActivity.phone);
                                         database.getReference("users").child(did).addChildEventListener(new ChildEventListener() {
                                             @Override
                                             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
@@ -91,7 +96,9 @@ public class IncompleteRequestMarkerDialog extends Dialog{
                                                                 @Override
                                                                 public void onSuccess(Void aVoid) {
                                                                     showToast(getContext(),"Connected successfully!");
+                                                                    pb.setVisibility(View.INVISIBLE);
                                                                     c.startActivity(new Intent(c, SelectSHType.class));
+                                                                    c.finish();
                                                                 }
                                                             });
                                                         }

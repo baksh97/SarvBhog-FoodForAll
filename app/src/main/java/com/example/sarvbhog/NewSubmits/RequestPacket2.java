@@ -9,11 +9,13 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.sarvbhog.Classes.RequestClass;
 import com.example.sarvbhog.R;
+import com.example.sarvbhog.SelectLocation;
 import com.example.sarvbhog.Status.RequestStatus;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -42,7 +44,8 @@ public class RequestPacket2 extends AppCompatActivity {
 
     TextInputLayout name_til, count_til, phone_til;
     TextView addr_tv;
-    Button submit;
+    Button submit, get_location_btn;
+    ProgressBar pb;
 
     String city,state;
     String addr;
@@ -57,11 +60,26 @@ public class RequestPacket2 extends AppCompatActivity {
         database = FirebaseDatabase.getInstance();
         final DatabaseReference myref = database.getReference("requests");
 
+        get_location_btn = (Button) findViewById(R.id.get_location_btn_rp);
+        pb = (ProgressBar) findViewById(R.id.pb_requestpacket);
+        pb.setVisibility(View.INVISIBLE);
         name_til =  (TextInputLayout) findViewById(R.id.name_til_rp2);
         phone_til = (TextInputLayout) findViewById(R.id.phone_til_rp2);
         count_til = (TextInputLayout) findViewById(R.id.count_til_rp2);
         submit = (Button) findViewById(R.id.submit_request_btn_rp2);
         addr_tv = (TextView) findViewById(R.id.location_tv_rp2);
+
+
+        addr_tv.setVisibility(View.INVISIBLE);
+        get_location_btn.setVisibility(View.INVISIBLE);
+        get_location_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(thisContext, SelectLocation.class);
+                intent.putExtra("Class",RequestPacket2.class);
+                startActivity(intent);
+            }
+        });
 
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -73,6 +91,7 @@ public class RequestPacket2 extends AppCompatActivity {
                     if(count==0){
                         showToast(thisContext, "Number of people can't be 0!");
                     }else {
+                        pb.setVisibility(View.VISIBLE);
                         final String key = myref.push().getKey();
                         RequestClass m = new RequestClass();
                         m.addr = addr;
@@ -94,6 +113,7 @@ public class RequestPacket2 extends AppCompatActivity {
                                 myref.child("requestsRegionWise").child(state).child(city).push().setValue(key).addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
+                                        pb.setVisibility(View.INVISIBLE);
                                         if(task.isSuccessful()){
                                             writeData(RequestPacket2.this,"requests.txt",key+"\n");
                                             Intent intent = new Intent(RequestPacket2.this, RequestStatus.class);
@@ -112,6 +132,7 @@ public class RequestPacket2 extends AppCompatActivity {
                     }
                 }
                 catch (Exception e){
+                    pb.setVisibility(View.INVISIBLE);
                     showToast(thisContext,"Number of people should be a number!");
                 }
             }
@@ -126,14 +147,35 @@ public class RequestPacket2 extends AppCompatActivity {
 
         initViews();
 
-        Intent intent = getIntent();
-        addr = intent.getStringExtra("addr");
-        addr_tv.setText(addr);
+//        Intent intent = getIntent();
 
-        lat = intent.getDoubleExtra("lat",0);
-        lon = intent.getDoubleExtra("lon",0);
-        city = intent.getStringExtra("city");
-        state = intent.getStringExtra("state");
+//        else{
+            submit.setVisibility(View.INVISIBLE);
+            get_location_btn.setVisibility(View.VISIBLE);
+            addr_tv.setVisibility(View.INVISIBLE);
+//        }
 
+    }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(SelectLocation.selected) {
+            city = SelectLocation.lastCity;
+            state = SelectLocation.lastState;
+            lat = SelectLocation.lastFetchedLat;
+            lon = SelectLocation.lastFetchedLat;
+            addr = SelectLocation.lastFetchedLocation;
+            SelectLocation.selected=false;
+
+            addr_tv.setText(addr);
+
+
+            addr_tv.setVisibility(View.VISIBLE);
+            get_location_btn.setVisibility(View.INVISIBLE);
+            submit.setVisibility(View.VISIBLE);
+
+        }
     }
 }

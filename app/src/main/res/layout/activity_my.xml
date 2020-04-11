@@ -12,6 +12,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
         android:orientation="vertical"
@@ -19,7 +20,7 @@
         app:layout_constraintBottom_toTopOf="@+id/linearLayout3"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView13">
+        app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -42,7 +43,8 @@
                 android:layout_margin="8dp"
                 android:layout_weight="1"
                 android:background="@drawable/ripple_button"
-                android:text="Request Food" />
+                android:text="Request Food"
+                android:textColor="@color/white" />
         </LinearLayout>
 
         <LinearLayout
@@ -62,7 +64,8 @@
                 android:layout_marginEnd="8dp"
                 android:layout_weight="1"
                 android:background="@drawable/ripple_button"
-                android:text="Volunteer to cook" />
+                android:text="Volunteer to cook"
+                android:textColor="@color/white" />
 
             <ImageView
                 android:id="@+id/imageView3"
@@ -94,7 +97,8 @@
                 android:layout_margin="8dp"
                 android:layout_weight="1"
                 android:background="@drawable/ripple_button"
-                android:text="Volunteer to deliver" />
+                android:text="Volunteer to deliver"
+                android:textColor="@color/white" />
 
         </LinearLayout>
 
@@ -121,7 +125,8 @@
             android:layout_margin="16dp"
             android:layout_weight="1"
             android:background="@drawable/ripple_button_cyan"
-            android:text="Button" />
+            android:text="Login"
+            android:textColor="@color/white" />
 
         <Button
             android:id="@+id/register_btn_my"
@@ -130,19 +135,8 @@
             android:layout_margin="16dp"
             android:layout_weight="1"
             android:background="@drawable/ripple_button_cyan"
-            android:text="Register" />
+            android:text="Register"
+            android:textColor="@color/white" />
     </LinearLayout>
-
-    <TextView
-        android:id="@+id/textView13"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:text="Select"
-        android:textColor="@android:color/black"
-        android:textSize="20sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

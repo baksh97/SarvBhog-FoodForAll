@@ -15,9 +15,11 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.sarvbhog.MyActivity;
 import com.example.sarvbhog.NewSubmits.PreparePacket;
 import com.example.sarvbhog.R;
 import com.example.sarvbhog.SelectSHType;
@@ -32,15 +34,18 @@ import com.google.firebase.auth.PhoneAuthProvider;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.concurrent.TimeUnit;
+
 import static com.example.sarvbhog.CommonFunctions.showToast;
 
 public class CodeVerify extends AppCompatActivity implements View.OnKeyListener {
 
     private EditText et1,et2,et3,et4,et5,et6, codeEt;
     private Button verifyCodeBtn;
+    private ProgressBar pb;
     private FirebaseAuth mAuth;
     private EditText[] editTexts;
-    private TextView phone_tv;
+    private TextView phone_tv,resend_tv;
     private String name="", phone="",entity="";
 
     private static final String TAG = "CodeVerify";
@@ -48,6 +53,20 @@ public class CodeVerify extends AppCompatActivity implements View.OnKeyListener 
     Context thisContext = CodeVerify.this;
 
     FirebaseDatabase database = FirebaseDatabase.getInstance();
+
+    PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks;
+    PhoneAuthProvider.ForceResendingToken mResendToken;
+
+    private void resendVerificationCode(String phoneNumber,
+                                        PhoneAuthProvider.ForceResendingToken token) {
+        PhoneAuthProvider.getInstance().verifyPhoneNumber(
+                phoneNumber,        // Phone number to verify
+                60,                 // Timeout duration
+                TimeUnit.SECONDS,   // Unit of timeout
+                this,               // Activity (for callback binding)
+                mCallbacks,         // OnVerificationStateChangedCallbacks
+                token);             // ForceResendingToken from callbacks
+    }
 
     private void signInWithPhoneAuthCredential(PhoneAuthCredential credential) {
         mAuth.signInWithCredential(credential)
@@ -68,19 +87,25 @@ public class CodeVerify extends AppCompatActivity implements View.OnKeyListener 
                                 myref.child(user.getUid()).child("phone").setValue(phone);
                                 myref.child(user.getUid()).child("requests_served").setValue(0);
                                 myref.child(user.getUid()).child("producers_connected").setValue(0);
-                                database.getReference(entity).child(user.getUid());
+                                database.getReference(entity).push().setValue(user.getUid());
+                                showToast(thisContext,"Registration Successful!");
+                            }
+                            else{
+                                showToast(thisContext,"Login Successful!");
                             }
 //                            myref.child(user.getUid()).child("name").setValue(name);
 //                            myref.child(user.getUid()).child("phone").setValue(phone);
 
-                            showToast(thisContext,"Registration Successful!");
-                            startActivity(new Intent(CodeVerify.this, SelectSHType.class));
+
+                            pb.setVisibility(View.INVISIBLE);
+                            startActivity(new Intent(CodeVerify.this, MyActivity.class));
                             finish();
 //                            startActivity(new Intent(PhoneLogin.this, HomeScreen.class));
                             // ...
                         } else {
                             // Sign in failed, display a message and update the UI
                             Log.w(TAG, "signInWithCredential:failure", task.getException());
+                            pb.setVisibility(View.INVISIBLE);
                             Toast.makeText(CodeVerify.this, "Login unsuccessful!", Toast.LENGTH_SHORT).show();
                             if (task.getException() instanceof FirebaseAuthInvalidCredentialsException) {
                                 // The verification code entered was invalid
@@ -104,6 +129,9 @@ public class CodeVerify extends AppCompatActivity implements View.OnKeyListener 
         verifyCodeBtn = (Button) findViewById(R.id.verifycode_btn_codeenter);
         mAuth = FirebaseAuth.getInstance();
 
+        resend_tv = (TextView) findViewById(R.id.resend_tv_codeverify);
+        pb = (ProgressBar) findViewById(R.id.pb_code_verify);
+        pb.setVisibility(View.INVISIBLE);
         phone_tv = (TextView) findViewById(R.id.mobile_number_tv_codeverify);
         editTexts = new EditText[6];
         et1 = (EditText) findViewById(R.id.code1_et_codeverify);
@@ -118,6 +146,8 @@ public class CodeVerify extends AppCompatActivity implements View.OnKeyListener 
         editTexts[3]=et4;
         editTexts[4]=et5;
         editTexts[5]=et6;
+
+
 
 //        et1.addTextChangedListener(new GenericTextWatcher(et1));
 //        et2.addTextChangedListener(new GenericTextWatcher(et2));
@@ -164,16 +194,26 @@ public class CodeVerify extends AppCompatActivity implements View.OnKeyListener 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_code_verify);
 
-        initViews();
 
         Intent intent = getIntent();
+        String c_act = intent.getStringExtra("c_act");
+        if(c_act.equals("register")){
+            mCallbacks = Register.mCallbacks;
+            mResendToken = Register.mResendToken;
+        }
+        else if(c_act.equals("login")){
+            mCallbacks = Login.mCallbacks;
+            mResendToken = Login.mResendToken;
+        }
+
         mVerificationId = intent.getStringExtra("mVerificationId");
+        phone = intent.getStringExtra("phone");
         if(intent.hasExtra("name")) {
             name = intent.getStringExtra("name");
-            phone = intent.getStringExtra("phone");
             entity=intent.getStringExtra("entity");
         }
 
+        initViews();
         phone_tv.setText(phone);
 
         verifyCodeBtn.setOnClickListener(new View.OnClickListener() {
@@ -181,8 +221,17 @@ public class CodeVerify extends AppCompatActivity implements View.OnKeyListener 
             public void onClick(View view) {
                 if(getCode().equals("")){
                     Toast.makeText(CodeVerify.this, "Please enter the 6 digit code!", Toast.LENGTH_SHORT).show();
-                }else
+                }else {
+                    pb.setVisibility(View.VISIBLE);
                     verifyCode();
+                }
+            }
+        });
+
+        resend_tv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                resendVerificationCode(phone,mResendToken );
             }
         });
     }
