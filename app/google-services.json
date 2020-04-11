@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "548683375956",
+    "firebase_url": "https://sarvbhog-4d1b2.firebaseio.com",
+    "project_id": "sarvbhog-4d1b2",
+    "storage_bucket": "sarvbhog-4d1b2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:548683375956:android:7a18385620cfcceb8654c1",
+        "android_client_info": {
+          "package_name": "com.example.sarvbhog"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "548683375956-ref6tmkt3pcc92odlli9srjqr9b3qtmq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.sarvbhog",
+            "certificate_hash": "73f62a2a76aab862cc38ecff828b428b63f7a16c"
+          }
+        },
+        {
+          "client_id": "548683375956-dfq0r4ku29lg8o58agivjfjglm9p0b9g.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC8zTmQnBmF4dgjHYRZM0VVCy_HQA0wvKo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "548683375956-dfq0r4ku29lg8o58agivjfjglm9p0b9g.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="example.javatpoint.com.optionmenu.MainActivity">
+
+    <item  android:id="@+id/profile"
+        android:title="Profile"/>
+    <item  android:id="@+id/prepare"
+        android:title="Prepare"/>
+    <item  android:id="@+id/request_status"
+        android:title="My Requests"/>
+    <item  android:id="@+id/prepare_status"
+        android:title="My Prepare"/>
+    <!--<item  android:id="@+id/nearby_requests"-->
+        <!--android:title="Check Requests"/>-->
+    <!--<item  android:id="@+id/nearby_prepare"-->
+        <!--android:title="Check Producers"/>-->
+    <item  android:id="@+id/sign_out"
+        android:title="Sign out"
+        app:showAsAction="withText"/>
+</menu>

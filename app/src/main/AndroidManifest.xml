@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.saravbhog">
+    package="com.example.sarvbhog">
 
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"></uses-permission>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"></uses-permission>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"></uses-permission>
-
-
-
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -16,6 +15,15 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".MyActivity"></activity>
+        <activity android:name=".Register.Login" />
+        <activity android:name=".Status.PrepareStatus" />
+        <activity android:name=".Profile" />
+        <activity android:name=".SelectLocation" />
+        <activity android:name=".Register.CodeVerify" />
+        <activity android:name=".Register.Register" />
+        <activity android:name=".Status.RequestStatus" />
+        <activity android:name=".NewSubmits.RequestPacket2" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
@@ -24,17 +32,13 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
-        <activity android:name=".DistributePacket"></activity>
-        <activity android:name=".PreparePacket" />
-        <activity android:name=".RequestPacket" />
-        <activity android:name=".SelectSHType" >
+        <activity android:name=".NewSubmits.PreparePacket" />
+        <activity android:name=".SelectSHType">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-        <activity android:name=".MainActivity">
         </activity>
     </application>
 
