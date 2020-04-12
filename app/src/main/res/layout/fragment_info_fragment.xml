@@ -83,7 +83,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
-                android:text="Producers Connected" />
+                android:text="Packets collected" />
 
             <TextView
                 android:id="@+id/producers_tv_infofrag"

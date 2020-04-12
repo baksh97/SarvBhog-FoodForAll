@@ -15,18 +15,24 @@
         android:roundIcon="@mipmap/ic_prepare_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MyActivity">
+        <activity android:name=".MyActivity" android:configChanges="orientation"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Register.Login" />
-        <activity android:name=".Status.PrepareStatus" />
-        <activity android:name=".Profile" />
-        <activity android:name=".SelectLocation" />
-        <activity android:name=".Register.CodeVerify" />
+        <activity android:name=".Register.Login" android:configChanges="orientation"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".Status.PrepareStatus" android:configChanges="orientation"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".Profile" android:configChanges="orientation"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".SelectLocation" android:configChanges="orientation"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".Register.CodeVerify" android:configChanges="orientation"
+            android:screenOrientation="portrait"/>
         <activity android:name=".Register.Register" />
         <activity android:name=".Status.RequestStatus" />
         <activity android:name=".NewSubmits.RequestPacket2" />

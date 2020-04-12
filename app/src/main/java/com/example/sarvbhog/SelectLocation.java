@@ -105,7 +105,7 @@ public class SelectLocation extends AppCompatActivity implements OnMapReadyCallb
     private final String INCOMPLETE_REQUEST_TAG = "IRT", COMPLETE_REQUEST_TAG = "CRT", INCOMPLETE_PREPARE_TAG="IPT",COMPLETE_PREPARE_TAG="CPT";
 
     //newvars
-    Marker currentMarker=null;
+    static Marker currentMarker=null;
     private BitmapDescriptor incompleteRequest_bitmap,completeRequest_bitmap,completePrepare_bitmap,incompletePrepare_bitmap;
 //    private BitmapDescriptor
 //    private BitmapDescriptor
@@ -210,7 +210,15 @@ public class SelectLocation extends AppCompatActivity implements OnMapReadyCallb
         });
 
         if (mLocationPermissionsGranted) {
-            getDeviceLocation();
+            init();
+
+            if(currentMarker==null) {
+                getDeviceLocation();
+            }
+            else{
+                mSearchText.setText(currentMarker.getTitle());
+                geoLocate();
+            }
 
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                     != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this,
@@ -221,7 +229,6 @@ public class SelectLocation extends AppCompatActivity implements OnMapReadyCallb
             mMap.getUiSettings().setMyLocationButtonEnabled(false);
 
 
-            init();
         }
     }
 
@@ -378,6 +385,9 @@ public class SelectLocation extends AppCompatActivity implements OnMapReadyCallb
             String addr = getAddressFromLocation(new LatLng(address.getLatitude(),address.getLongitude()));
 
             moveCamera(new LatLng(address.getLatitude(), address.getLongitude()), DEFAULT_ZOOM);
+            if(currentMarker!=null)
+            currentMarker.remove();
+            currentMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(address.getLatitude(), address.getLongitude())).title(addr));
         }
     }
 
@@ -403,7 +413,8 @@ public class SelectLocation extends AppCompatActivity implements OnMapReadyCallb
 //                            lastFetchedLon = currentLocation.getLongitude();
 //                            lastFetchedLocation = addr;
                                 moveCamera(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()), DEFAULT_ZOOM);
-                                currentMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude())));
+                                if(currentMarker!=null)currentMarker.remove();
+                                currentMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude())).title(addr));
                             }
 
                         }else{

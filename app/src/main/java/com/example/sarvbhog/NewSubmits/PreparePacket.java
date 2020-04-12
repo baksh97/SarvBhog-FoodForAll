@@ -167,7 +167,7 @@ public class PreparePacket extends AppCompatActivity {
             city = SelectLocation.lastCity;
             state = SelectLocation.lastState;
             lat = SelectLocation.lastFetchedLat;
-            lon = SelectLocation.lastFetchedLat;
+            lon = SelectLocation.lastFetchedLon;
             addr = SelectLocation.lastFetchedLocation;
             SelectLocation.selected=false;
 

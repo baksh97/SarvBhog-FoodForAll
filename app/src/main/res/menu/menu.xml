@@ -6,8 +6,6 @@
 
     <item  android:id="@+id/profile"
         android:title="Profile"/>
-    <item  android:id="@+id/prepare"
-        android:title="Prepare"/>
     <item  android:id="@+id/request_status"
         android:title="My Requests"/>
     <item  android:id="@+id/prepare_status"

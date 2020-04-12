@@ -114,7 +114,7 @@ public class SelectSHType extends AppCompatActivity implements GoogleMap.OnMarke
     private final String INCOMPLETE_REQUEST_TAG = "IRT", COMPLETE_REQUEST_TAG = "CRT", INCOMPLETE_PREPARE_TAG="IPT",COMPLETE_PREPARE_TAG="CPT";
 
     //newvars
-    Marker currentMarker=null;
+    static Marker currentMarker=null;
     private BitmapDescriptor incompleteRequest_bitmap,completeRequest_bitmap,completePrepare_bitmap,incompletePrepare_bitmap;
 //    private BitmapDescriptor
 //    private BitmapDescriptor
@@ -329,6 +329,11 @@ public class SelectSHType extends AppCompatActivity implements GoogleMap.OnMarke
     }
 
 
+    void refreshMarkers(Address fetchedAddress) throws Exception{
+        getOtherRequestsInCity(fetchedAddress.getLocality(), fetchedAddress.getAdminArea());
+        getOtherPreparesInCity(fetchedAddress.getLocality(), fetchedAddress.getAdminArea());
+    }
+
     String getLocationName(Address fetchedAddress){
 //        String addr = fetchedAddress.getAddressLine(0);
         return fetchedAddress.getAddressLine(0);
@@ -349,8 +354,7 @@ public class SelectSHType extends AppCompatActivity implements GoogleMap.OnMarke
                 lastCity = fetchedAddress.getLocality();
                 mSearchText.setText(getLocationName(fetchedAddress));
                 try {
-                    getOtherRequestsInCity(fetchedAddress.getLocality(), fetchedAddress.getAdminArea());
-                    getOtherPreparesInCity(fetchedAddress.getLocality(), fetchedAddress.getAdminArea());
+                    refreshMarkers(fetchedAddress);
                 }
                 catch (Exception e){
                 }
@@ -388,6 +392,8 @@ public class SelectSHType extends AppCompatActivity implements GoogleMap.OnMarke
                     currentMarker.remove();
                 }
 
+                ic_info.setVisibility(View.INVISIBLE);
+
                 String addr = getAddressFromLocation(point);
 //                RequestClass marker = new RequestClass();
                 currentMarker = mMap.addMarker(new MarkerOptions().position(point).title(addr));
@@ -395,7 +401,14 @@ public class SelectSHType extends AppCompatActivity implements GoogleMap.OnMarke
         });
 
         if (mLocationPermissionsGranted) {
-            getDeviceLocation();
+            init();
+            if(currentMarker==null) {
+                getDeviceLocation();
+            }
+            else{
+                mSearchText.setText(currentMarker.getTitle());
+                geoLocate();
+            }
 
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                     != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this,
@@ -406,7 +419,7 @@ public class SelectSHType extends AppCompatActivity implements GoogleMap.OnMarke
             mMap.getUiSettings().setMyLocationButtonEnabled(false);
 
 
-            init();
+
         }
     }
 
@@ -567,6 +580,8 @@ public class SelectSHType extends AppCompatActivity implements GoogleMap.OnMarke
             String addr = getAddressFromLocation(new LatLng(address.getLatitude(),address.getLongitude()));
 
             moveCamera(new LatLng(address.getLatitude(), address.getLongitude()), DEFAULT_ZOOM);
+            if(currentMarker!=null)currentMarker.remove();
+            currentMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(address.getLatitude(), address.getLongitude())).title(addr));
         }
     }
 
@@ -592,7 +607,8 @@ public class SelectSHType extends AppCompatActivity implements GoogleMap.OnMarke
 //                            lastFetchedLon = currentLocation.getLongitude();
 //                            lastFetchedLocation = addr;
                                 moveCamera(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()), DEFAULT_ZOOM);
-                                currentMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude())));
+                                if(currentMarker!=null)currentMarker.remove();
+                                currentMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude())).title(addr));
                             }
 
                         }else{
@@ -759,6 +775,13 @@ public class SelectSHType extends AppCompatActivity implements GoogleMap.OnMarke
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_shtype);
+
+        if(currentMarker==null) {
+            Log.d(TAG, "currentMarker is null");
+        }
+        else{
+            Log.d(TAG, "currentMarker: "+currentMarker.getTitle());
+        }
 
             Log.d(TAG,"Calling on create checkgps");
             checkGPS(true);
